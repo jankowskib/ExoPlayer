@@ -55,7 +55,7 @@ public final class EventMessageEncoder {
       writeUnsignedInt(dataOutputStream, timescale);
       long presentationTime = Util.scaleLargeTimestamp(eventMessage.presentationTimeUs,
           timescale, C.MICROS_PER_SECOND);
-      writeUnsignedInt(dataOutputStream, presentationTime);
+      writeUnsignedLong(dataOutputStream, presentationTime);
       long duration = Util.scaleLargeTimestamp(eventMessage.durationMs, timescale, 1000);
       writeUnsignedInt(dataOutputStream, duration);
       writeUnsignedInt(dataOutputStream, eventMessage.id);
@@ -76,6 +76,18 @@ public final class EventMessageEncoder {
 
   private static void writeUnsignedInt(DataOutputStream outputStream, long value)
       throws IOException {
+    outputStream.writeByte((int) (value >>> 24) & 0xFF);
+    outputStream.writeByte((int) (value >>> 16) & 0xFF);
+    outputStream.writeByte((int) (value >>> 8) & 0xFF);
+    outputStream.writeByte((int) value & 0xFF);
+  }
+
+  private static void writeUnsignedLong(DataOutputStream outputStream, long value)
+      throws IOException {
+    outputStream.writeByte((int) (value >>> 56) & 0xFF);
+    outputStream.writeByte((int) (value >>> 48) & 0xFF);
+    outputStream.writeByte((int) (value >>> 40) & 0xFF);
+    outputStream.writeByte((int) (value >>> 32) & 0xFF);
     outputStream.writeByte((int) (value >>> 24) & 0xFF);
     outputStream.writeByte((int) (value >>> 16) & 0xFF);
     outputStream.writeByte((int) (value >>> 8) & 0xFF);

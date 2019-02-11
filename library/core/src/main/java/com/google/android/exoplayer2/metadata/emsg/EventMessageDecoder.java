@@ -43,7 +43,7 @@ public final class EventMessageDecoder implements MetadataDecoder {
     String schemeIdUri = Assertions.checkNotNull(emsgData.readNullTerminatedString());
     String value = Assertions.checkNotNull(emsgData.readNullTerminatedString());
     long timescale = emsgData.readUnsignedInt();
-    long presentationTimeUs = Util.scaleLargeTimestamp(emsgData.readUnsignedInt(),
+    long presentationTimeUs = Util.scaleLargeTimestamp(emsgData.readUnsignedLongToLong(),
         C.MICROS_PER_SECOND, timescale);
     long durationMs = Util.scaleLargeTimestamp(emsgData.readUnsignedInt(), 1000, timescale);
     long id = emsgData.readUnsignedInt();

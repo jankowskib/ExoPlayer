@@ -36,7 +36,7 @@ public final class EventMessageDecoderTest {
         117, 114, 110, 58, 116, 101, 115, 116, 0, // scheme_id_uri = "urn:test"
         49, 50, 51, 0, // value = "123"
         0, 0, -69, -128, // timescale = 48000
-        0, 0, -69, -128, // presentation_time_delta = 48000
+        0, 0, 0, 0, 0, 0, -69, -128, // presentation_time_delta = 48000
         0, 2, 50, -128, // event_duration = 144000
         0, 15, 67, -45, // id = 1000403
         0, 1, 2, 3, 4}; // message_data = {0, 1, 2, 3, 4}
@@ -52,6 +52,30 @@ public final class EventMessageDecoderTest {
     assertThat(eventMessage.id).isEqualTo(1000403);
     assertThat(eventMessage.messageData).isEqualTo(new byte[]{0, 1, 2, 3, 4});
     assertThat(eventMessage.presentationTimeUs).isEqualTo(1000000);
+  }
+
+  @Test
+  public void testDecodeEventMessageWithLongPresentationTimeValue() {
+    byte[] rawEmsgBody = new byte[] {
+        117, 114, 110, 58, 116, 101, 115, 116, 0, // scheme_id_uri = "urn:test"
+        49, 50, 51, 0, // value = "123"
+        0, 0, -69, -128, // timescale = 48000
+        0, 0, 19, 112, 47, -18, 49, 80, // presentation_time_delta = 21372561404240L
+        0, 2, 50, -128, // event_duration = 144000
+        0, 15, 67, -45, // id = 1000403
+        0, 1, 2, 3, 4}; // message_data = {0, 1, 2, 3, 4}
+    EventMessageDecoder decoder = new EventMessageDecoder();
+    MetadataInputBuffer buffer = new MetadataInputBuffer();
+    buffer.data = ByteBuffer.allocate(rawEmsgBody.length).put(rawEmsgBody);
+    Metadata metadata = decoder.decode(buffer);
+    assertThat(metadata.length()).isEqualTo(1);
+    EventMessage eventMessage = (EventMessage) metadata.get(0);
+    assertThat(eventMessage.schemeIdUri).isEqualTo("urn:test");
+    assertThat(eventMessage.value).isEqualTo("123");
+    assertThat(eventMessage.durationMs).isEqualTo(3000);
+    assertThat(eventMessage.id).isEqualTo(1000403);
+    assertThat(eventMessage.messageData).isEqualTo(new byte[]{0, 1, 2, 3, 4});
+    assertThat(eventMessage.presentationTimeUs).isEqualTo(445261695921666L);
   }
 
 }

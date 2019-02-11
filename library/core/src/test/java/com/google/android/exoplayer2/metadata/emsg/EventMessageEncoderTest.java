@@ -39,7 +39,7 @@ public final class EventMessageEncoderTest {
         117, 114, 110, 58, 116, 101, 115, 116, 0, // scheme_id_uri = "urn:test"
         49, 50, 51, 0, // value = "123"
         0, 0, -69, -128, // timescale = 48000
-        0, 0, -69, -128, // presentation_time_delta = 48000
+        0, 0, 0, 0, 0, 0, -69, -128, // presentation_time_delta = 48000
         0, 2, 50, -128, // event_duration = 144000
         0, 15, 67, -45, // id = 1000403
         0, 1, 2, 3, 4}; // message_data = {0, 1, 2, 3, 4}
@@ -69,7 +69,7 @@ public final class EventMessageEncoderTest {
         117, 114, 110, 58, 116, 101, 115, 116, 0, // scheme_id_uri = "urn:test"
         49, 50, 51, 0, // value = "123"
         0, 0, -69, -128, // timescale = 48000
-        0, 0, -69, -128, // presentation_time_delta = 48000
+        0, 0, 0, 0, 0, 0, -69, -128, // presentation_time_delta = 48000
         0, 2, 50, -128, // event_duration = 144000
         0, 15, 67, -45, // id = 1000403
         0, 1, 2, 3, 4}; // message_data = {0, 1, 2, 3, 4}
@@ -79,7 +79,7 @@ public final class EventMessageEncoderTest {
         117, 114, 110, 58, 116, 101, 115, 116, 0, // scheme_id_uri = "urn:test"
         49, 50, 51, 0, // value = "123"
         0, 0, -69, -128, // timescale = 48000
-        0, 0, -69, -128, // presentation_time_delta = 48000
+        0, 0, 0, 0, 0, 0, -69, -128, // presentation_time_delta = 48000
         0, 2, 50, -128, // event_duration = 144000
         0, 15, 67, -46, // id = 1000402
         4, 3, 2, 1, 0}; // message_data = {4, 3, 2, 1, 0}
@@ -88,6 +88,22 @@ public final class EventMessageEncoderTest {
     assertThat(encodedByteArray).isEqualTo(expectedEmsgBody);
     byte[] encodedByteArray1 = eventMessageEncoder.encode(eventMessage1, 48000);
     assertThat(encodedByteArray1).isEqualTo(expectedEmsgBody1);
+  }
+
+  @Test
+  public void testEncodeEventStreamWithLongPresentationTime() throws IOException {
+    EventMessage eventMessage = new EventMessage("urn:test", "123", 3000, 1000403,
+            new byte[] {0, 1, 2, 3, 4}, 445261695921666L);
+    byte[] expectedEmsgBody = new byte[] {
+            117, 114, 110, 58, 116, 101, 115, 116, 0, // scheme_id_uri = "urn:test"
+            49, 50, 51, 0, // value = "123"
+            0, 0, -69, -128, // timescale = 48000
+            0, 0, 19, 112, 47, -18, 49, 79, // presentation_time_delta = 21372561404239L
+            0, 2, 50, -128, // event_duration = 144000
+            0, 15, 67, -45, // id = 1000403
+            0, 1, 2, 3, 4}; // message_data = {0, 1, 2, 3, 4}
+    byte[] encodedByteArray = new EventMessageEncoder().encode(eventMessage, 48000);
+    assertThat(encodedByteArray).isEqualTo(expectedEmsgBody);
   }
 
 }
